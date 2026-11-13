@@ -1,0 +1,318 @@
+<ion-content [fullscreen]="true">
+  <main class="report-page">
+
+    <!-- Banner -->
+    <header class="page-heading">
+      <p class="eyebrow">IT Department • Lost &amp; Found</p>
+      <h1>Report an Item</h1>
+      <p class="heading-description">
+        {{ reportType === 'FOUND'
+          ? 'Tell us about the item you found.'
+          : reportType === 'LOST'
+            ? 'Tell us about the item you lost.'
+            : 'Choose what you would like to report.' }}
+      </p>
+    </header>
+
+    <!-- Step 1: choose type -->
+    <section class="report-choice" *ngIf="!reportType && !showSuccess">
+
+      <h2>What would you like to report?</h2>
+      <p class="card-description">Select the type of report you want to submit.</p>
+
+      <button type="button" class="choice-card" (click)="chooseReportType('FOUND')">
+        <span class="choice-icon found">
+          <ion-icon name="checkmark-circle-outline"></ion-icon>
+        </span>
+        <span class="choice-details">
+          <strong>I found an item</strong>
+          <small>I found something and turned it over to the IT Department.</small>
+        </span>
+        <ion-icon class="choice-arrow" name="chevron-forward"></ion-icon>
+      </button>
+
+      <button type="button" class="choice-card" (click)="chooseReportType('LOST')">
+        <span class="choice-icon lost">
+          <ion-icon name="search-outline"></ion-icon>
+        </span>
+        <span class="choice-details">
+          <strong>I lost an item</strong>
+          <small>I lost something and want to report it.</small>
+        </span>
+        <ion-icon class="choice-arrow" name="chevron-forward"></ion-icon>
+      </button>
+
+    </section>
+
+    <!-- Success -->
+    <section class="success-card" *ngIf="showSuccess">
+      <span class="success-icon">
+        <ion-icon name="checkmark-circle"></ion-icon>
+      </span>
+      <h2>Report submitted!</h2>
+      <p>
+        {{ submittedType === 'FOUND'
+          ? 'Thank you for turning in the item. The owner can now find it in the Found Items list.'
+          : 'Your lost item report is now visible in the Lost Items list. We hope it gets returned soon.' }}
+      </p>
+      <button type="button" class="submit-button" (click)="reportAnother()">
+        Report another item
+      </button>
+    </section>
+
+    <!-- Step 2: form -->
+    <form class="report-form" *ngIf="reportType" novalidate (ngSubmit)="submitReport()">
+
+      <!-- Type switch -->
+      <div class="type-switch">
+        <button
+          type="button"
+          class="switch-option lost"
+          [class.active]="reportType === 'LOST'"
+          (click)="switchType('LOST')">
+          I lost something
+        </button>
+        <button
+          type="button"
+          class="switch-option found"
+          [class.active]="reportType === 'FOUND'"
+          (click)="switchType('FOUND')">
+          I found something
+        </button>
+      </div>
+
+      <!-- Photo -->
+      <section class="card" [class.has-error]="invalid('photo')">
+
+        <div class="card-head">
+          <h2>Item photo</h2>
+          <span class="pill" [class.required]="reportType === 'FOUND'">
+            {{ reportType === 'FOUND' ? 'Required' : 'Optional' }}
+          </span>
+        </div>
+
+        <p class="card-description">
+          {{ reportType === 'FOUND'
+            ? 'Add a clear photo to help the owner recognize the item.'
+            : 'Add a photo if you have one. It makes your item easier to identify.' }}
+        </p>
+
+        <div class="photo-box">
+          <ng-container *ngIf="photoDataUrl; else emptyPhoto">
+            <img [src]="photoDataUrl" alt="Item photo preview" class="preview-image">
+          </ng-container>
+
+          <ng-template #emptyPhoto>
+            <button
+              type="button"
+              class="photo-empty"
+              (click)="takePhoto()"
+              [disabled]="isTakingPhoto">
+              <span class="photo-circle">
+                <ion-icon name="camera-outline"></ion-icon>
+              </span>
+              <strong>Tap to take a photo</strong>
+              <small>Or choose one from your gallery below</small>
+            </button>
+          </ng-template>
+        </div>
+
+        <div class="photo-actions">
+          <button
+            type="button"
+            class="ghost-button"
+            (click)="takePhoto()"
+            [disabled]="isTakingPhoto">
+            <ion-icon name="camera-outline"></ion-icon>
+            {{ isTakingPhoto ? 'Opening...' : (photoDataUrl ? 'Retake' : 'Camera') }}
+          </button>
+
+          <button
+            type="button"
+            class="ghost-button"
+            (click)="pickFromGallery()"
+            [disabled]="isTakingPhoto">
+            <ion-icon name="images-outline"></ion-icon>
+            Gallery
+          </button>
+
+          <button
+            type="button"
+            class="ghost-button danger"
+            *ngIf="photoDataUrl"
+            (click)="removePhoto()">
+            <ion-icon name="trash-outline"></ion-icon>
+            Remove
+          </button>
+        </div>
+
+        <p class="error-text" *ngIf="invalid('photo')">
+          <ion-icon name="alert-circle"></ion-icon>
+          Please add a photo of the found item.
+        </p>
+
+      </section>
+
+      <!-- Details -->
+      <section class="card">
+
+        <div class="card-head">
+          <h2>Item details</h2>
+        </div>
+
+        <p class="card-description">
+          {{ reportType === 'FOUND'
+            ? 'Describe the item you found.'
+            : 'Describe the item you lost.' }}
+        </p>
+
+        <!-- Item name -->
+        <div class="field" [class.has-error]="invalid('itemName')">
+          <label for="itemName">Item name</label>
+          <div class="input-wrap">
+            <ion-icon name="pricetag-outline"></ion-icon>
+            <input
+              id="itemName"
+              name="itemName"
+              type="text"
+              placeholder="e.g. Black wallet"
+              [(ngModel)]="itemName">
+          </div>
+          <p class="error-text" *ngIf="invalid('itemName')">
+            <ion-icon name="alert-circle"></ion-icon>
+            Please enter the item name.
+          </p>
+        </div>
+
+        <!-- Category -->
+        <div class="field" [class.has-error]="invalid('category')">
+          <label>Category</label>
+          <div class="chip-list">
+            <button
+              type="button"
+              class="chip"
+              *ngFor="let option of categories"
+              [class.active]="category === option"
+              (click)="category = option">
+              {{ option }}
+            </button>
+          </div>
+          <p class="error-text" *ngIf="invalid('category')">
+            <ion-icon name="alert-circle"></ion-icon>
+            Please select a category.
+          </p>
+        </div>
+
+        <!-- Description -->
+        <div class="field" [class.has-error]="invalid('description')">
+          <label for="description">Description</label>
+          <div class="input-wrap textarea-wrap">
+            <textarea
+              id="description"
+              name="description"
+              rows="4"
+              [attr.maxlength]="maxDescription"
+              placeholder="Color, brand, size, or other identifying details..."
+              [(ngModel)]="description"></textarea>
+          </div>
+          <div class="field-foot">
+            <p class="error-text" *ngIf="invalid('description')">
+              <ion-icon name="alert-circle"></ion-icon>
+              Please describe the item.
+            </p>
+            <span class="counter">{{ description.length }}/{{ maxDescription }}</span>
+          </div>
+        </div>
+
+        <!-- Date -->
+        <div class="field" [class.has-error]="invalid('date')">
+          <label for="reportDate">
+            {{ reportType === 'FOUND' ? 'Date found' : 'Date lost' }}
+          </label>
+          <div class="input-wrap">
+            <ion-icon name="calendar-outline"></ion-icon>
+
+            <input
+              *ngIf="reportType === 'FOUND'"
+              id="reportDate"
+              name="dateFound"
+              type="date"
+              [max]="today"
+              [(ngModel)]="dateFound">
+
+            <input
+              *ngIf="reportType === 'LOST'"
+              id="reportDate"
+              name="dateLost"
+              type="date"
+              [max]="today"
+              [(ngModel)]="dateLost">
+          </div>
+          <p class="error-text" *ngIf="invalid('date')">
+            <ion-icon name="alert-circle"></ion-icon>
+            Please choose a date.
+          </p>
+        </div>
+
+        <!-- Lost: last seen -->
+        <div class="field" *ngIf="reportType === 'LOST'" [class.has-error]="invalid('location')">
+          <label for="lastSeenLocation">Last seen location</label>
+          <div class="input-wrap">
+            <ion-icon name="location-outline"></ion-icon>
+            <input
+              id="lastSeenLocation"
+              name="lastSeenLocation"
+              type="text"
+              placeholder="e.g. IT Laboratory"
+              [(ngModel)]="lastSeenLocation">
+          </div>
+          <p class="error-text" *ngIf="invalid('location')">
+            <ion-icon name="alert-circle"></ion-icon>
+            Please enter where you last saw it.
+          </p>
+        </div>
+
+        <!-- Found: drop-off -->
+        <div class="drop-off" *ngIf="reportType === 'FOUND'">
+          <ion-icon name="location-outline"></ion-icon>
+          <div>
+            <strong>Turn over location</strong>
+            <span>IT Department Office</span>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- Notice -->
+      <section class="form-notice">
+        <ion-icon name="information-circle"></ion-icon>
+        <div>
+          <h3>Important reminder</h3>
+          <p *ngIf="reportType === 'FOUND'">
+            Please turn over the found item to the IT Department office.
+            Your report will help the owner identify and claim it.
+          </p>
+          <p *ngIf="reportType === 'LOST'">
+            Please provide accurate information. If someone turns the item
+            over to the IT Department, your report may help return it to you.
+          </p>
+        </div>
+      </section>
+
+      <!-- Sticky submit -->
+      <div class="submit-bar">
+        <button
+          type="submit"
+          class="submit-button"
+          [class.found]="reportType === 'FOUND'"
+          [disabled]="isTakingPhoto || isSubmitting">
+          {{ isSubmitting
+            ? 'Submitting...'
+            : (reportType === 'FOUND' ? 'Submit found item report' : 'Submit lost item report') }}
+        </button>
+      </div>
+
+    </form>
+
+  </main>
+</ion-content>

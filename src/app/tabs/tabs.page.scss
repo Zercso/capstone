@@ -1,0 +1,39 @@
+
+.findit-tab-bar {
+  --background: #ffffff;
+  --border: 1px solid #edf0f3;
+  --color: #8995a3;
+  --color-selected: #173b5b;
+
+  height: calc(64px + var(--ion-safe-area-bottom, 0px));
+  padding: 5px 8px calc(5px + var(--ion-safe-area-bottom, 0px));
+  box-shadow: 0 -3px 14px rgba(23, 52, 81, 0.05);
+}
+
+.findit-tab-bar ion-tab-button {
+  --color: #8995a3;
+  --color-selected: #173b5b;
+  --ripple-color: rgba(50, 134, 138, 0.12);
+
+  max-width: none;
+  font-size: 10px;
+  font-weight: 600;
+}
+
+.findit-tab-bar ion-tab-button ion-icon {
+  font-size: 21px;
+}
+
+.findit-tab-bar ion-tab-button ion-label {
+  margin-top: 4px;
+  font-size: 10px;
+}
+
+.findit-tab-bar .report-tab {
+  --color: #32868a;
+  --color-selected: #32868a;
+}
+
+.findit-tab-bar .report-tab ion-icon {
+  font-size: 29px;
+}

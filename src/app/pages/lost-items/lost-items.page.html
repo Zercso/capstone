@@ -1,0 +1,108 @@
+<ion-content [fullscreen]="true">
+  <main class="lost-page">
+
+    <!-- Banner -->
+    <header class="page-heading">
+      <p class="eyebrow">IT Department • Lost &amp; Found</p>
+      <h1>Lost Items</h1>
+      <p class="heading-description">
+        Browse belongings reported missing by students.
+      </p>
+    </header>
+
+    <!-- Search -->
+    <section class="search-section">
+      <label class="search-box">
+        <ion-icon name="search-outline"></ion-icon>
+        <input
+          type="search"
+          placeholder="Search lost items..."
+          aria-label="Search lost items"
+          [(ngModel)]="searchText"
+          (ngModelChange)="applyFilters()">
+        <button
+          type="button"
+          class="clear-button"
+          *ngIf="searchText"
+          aria-label="Clear search"
+          (click)="searchText = ''; applyFilters()">
+          <ion-icon name="close-circle"></ion-icon>
+        </button>
+      </label>
+    </section>
+
+    <!-- Categories -->
+    <section class="filter-section">
+      <div class="category-list">
+        <button
+          type="button"
+          class="category-chip"
+          *ngFor="let category of categories"
+          [class.active]="selectedCategory === category"
+          (click)="selectCategory(category)">
+          {{ category }}
+        </button>
+      </div>
+    </section>
+
+    <!-- Lost items -->
+    <section class="items-section">
+
+      <div class="section-heading">
+        <div>
+          <h2>Reported lost items</h2>
+          <p>Items reported missing</p>
+        </div>
+        <span class="item-count">{{ itemCount }} {{ itemCount === 1 ? 'item' : 'items' }}</span>
+      </div>
+
+      <div class="item-list">
+
+        <article class="item-card" *ngFor="let item of filteredItems">
+
+          <div class="item-photo">
+            <img *ngIf="item.photo" [src]="item.photo" [alt]="item.itemName">
+            <div class="photo-placeholder" *ngIf="!item.photo">
+              <ion-icon name="image-outline"></ion-icon>
+            </div>
+          </div>
+
+          <div class="item-details">
+
+            <div class="item-top">
+              <span class="item-category">{{ item.category }}</span>
+              <span class="item-status">LOST</span>
+            </div>
+
+            <h3>{{ item.itemName }}</h3>
+
+            <p class="item-description" *ngIf="item.description">
+              {{ item.description }}
+            </p>
+
+            <div class="item-meta">
+              <ion-icon name="location-outline"></ion-icon>
+              <span>{{ item.lastSeenLocation }}</span>
+            </div>
+
+            <div class="item-meta">
+              <ion-icon name="calendar-outline"></ion-icon>
+              <span>{{ item.dateLost | date:'MMM d, y' }}</span>
+            </div>
+
+          </div>
+
+        </article>
+
+        <!-- Empty state -->
+        <div class="empty-state" *ngIf="itemCount === 0">
+          <ion-icon name="search-outline"></ion-icon>
+          <h3>No lost items available</h3>
+          <p>No lost item reports match your search or selected category.</p>
+        </div>
+
+      </div>
+    </section>
+
+  </main>
+</ion-content>
